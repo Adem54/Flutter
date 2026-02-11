@@ -116,7 +116,6 @@ class _CalcState extends State<Calc> {
                             result = myRes.toString();
                           }
                   }
-
                   //result = value; // ✅ burada setState var
                 });
               },
