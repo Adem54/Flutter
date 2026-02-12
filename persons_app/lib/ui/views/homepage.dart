@@ -21,30 +21,229 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
 
-  final people = [
-    {"name": "Ahmet", "phone": "555 111 22 33"},
+  //Problem ne problem type sorunu yasiyruz...hem integer hem de string kullaniuorsun icerde...nasil olacak bu...
+  //Tipini diyorki sen int verecem diyuorsun ama object tipi oolarak beklioyr vs diye bir hata veriyor
+  /*COZUM BOYLE OLABLIR BOYLE DUURMLARDA
+  * final List<Map<String, dynamic>> people = [
+  {"id": 1, "name": "Ahmet", "phone": "555 111 22 33"},
+  {"id": 2, "name": "Zeynep", "phone": "555 444 55 66"},
+];
+
+  * */
+  //AMA SIMDILK BIZ INTEGER OLAN DEGERI KALDIRALIM OK
+  final List<Map<String, String>> people = [
+    {"name": "Adem", "phone": "555 111 22 33"},
     {"name": "Zeynep", "phone": "555 444 55 66"},
+    {"name": "Zehra", "phone": "999 444 55 66"},
   ];
 
+  late List<Map<String, String>> filteredPeople;//late diyerek ben bunu sonra atyacam diyorsun bu sekilde atamasan
+  // da hata almiyorsun normalde bos birakip gecemezsn hata alirsin en azindan default value atmaak zorundasin
+  // ya da git onu nullable yap derler adama
+  bool isSearching = false;
+  final TextEditingController searchCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    filteredPeople = List.from(people); // başlangıçta hepsi görünsün
+  }
+
+  //Bu fonksiyon yazdığın arama kelimesine göre listeyi daraltıyor:query boşsa → herkes görünsün,query doluysa → name veya phone içinde geçenleri göster
+  //setState koymamın sebebi:Liste değişti → UI yeniden çizilsin.
+  //where = filtrele, contains = içinde geçiyor mu?
+  Future<void> filter(String query) async {
+    print("query!!!!!!: ${query}");
+    //kullanici search yaparken texfield-input a girdigi text anlik olarak buryaa geliyor
+    final q = query.toLowerCase().trim();
+
+    setState(() {
+      if (q.isEmpty) {
+        filteredPeople = List.from(people);
+      } else {
+        filteredPeople = people.where((p) {
+          final name = p["name"]!.toLowerCase();
+          final phone = p["phone"]!.toLowerCase();
+          return name.contains(q) || phone.contains(q);
+        }).toList();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    searchCtrl.dispose();
+    super.dispose();
+  }
+  // dispose() nedir, niye yaparız?
+  /*
+  *Flutter’da bazı şeyler “kaynak” kullanır:
+TextEditingController
+AnimationController
+FocusNode
+StreamSubscription vs.
+Bunlar arkada:
+listener tutar,
+hafıza (memory) kullanır,
+bazen klavye/focus gibi sistem kaynaklarına bağlanır.
+Sayfa kapandığında (widget ekrandan gidince) bu kaynakları serbest bırakmazsan:
+memory leak gibi gereksiz kaynak kullanımı olur,
+“A TextEditingController was used after being disposed” gibi hatalar görebilirsin,
+özellikle uygulama büyüyünce performans düşebilir.
+* O yüzden:
+* @override
+void dispose() {
+  searchCtrl.dispose(); // ✅ controller'ı kapat
+  super.dispose();      // ✅ Flutter'ın kendi temizliğini de çalıştır
+}
+Özet: “Bu sayfa öldü, controller’ı da öldür.”
+   */
 
 
   @override
+  //peki neden actions kullanilyor action s icerisinekoyduklarmz ile persons yazisin text icinde de
+  // appBar icindeki ttile yanyana oyle mi ayrica peki bunlar ayni hizada mi bulunuyor peki dikey de
+  // ve yatay da da neye gore hizalaniyor bunlara bizde ayarlama yapaiblikr miyiz hizalama konusunda
+  /*
+1) title ile actions yan yana mı?
+Evet, pratikte aynı yatay satırda gibi düşün:
+title: → solda (leading’den sonra kalan alanda)
+actions: → sağda (en sağda, yan yana ikonlar)
+Ama teknik olarak AppBar kendi layout’uyla bunları yerleştiriyor (Row gibi).
+2) Aynı hizada mı (dikey/yatay)?
+Evet:
+Dikeyde: AppBar’ın yüksekliğinin ortasına göre hizalanırlar (center-ish).
+Yatayda: actions elemanları sağa yaslanır ve yan yana dizilir.
+Sen ekstra bir şey yapmasan bile “güzel hizalı” durmasının sebebi AppBar’ın bunu standartlaştırması.
+Hizalamayı biz ayarlayabilir miyiz?
+Evet, birkaç yaygın ayar var:Başlığı ortalamak (Android’de default sola yakın, iOS’ta ortalı olabilir)
+centerTitle: true,
+B) Title ile actions arasında boşluğu kontrol etmek
+actions ikonlarının sağa yaslanma/padding’ini kontrol için:
+actionsPadding: const EdgeInsets.only(right: 8),
+(Flutter sürümüne göre actionsPadding varsa kullanırsın; yoksa Padding ile sararsın.)
+Action ikonlarını daha farklı hizalamak (çok gerekmez)-actions içine Row, Center, Align koyabilirsin ama çoğu zaman gerek yok:
+AppBar yüksekliğini değiştirmek-toolbarHeight:70
+Kısa özet (notluk)
+title solda başlık
+actions sağda ikon/buton alanı
+Aynı satırdalar, dikeyde otomatik ortalanırlar
+centerTitle, toolbarHeight, Padding ile ince ayar yaparsın
+
+  * */
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title:Text("Homepage")),
+      appBar: AppBar(
+//AppBar’da neden isSearching kullandık?Su mantik Normalde: title = "Persons",Search’e basınca: title = TextField-
+// Bu switch’i yapmak için bir boolean (aç/kapa) değişkeni lazımdı:
+          title: isSearching ?
+          TextField(
+            controller:searchCtrl,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: "Search....",
+              border: InputBorder.none,
+            ),
+            //onChanged: filter,//Bu islem ile alttaki islem ayni seydir aslinda
+            onChanged:(searchedText){
+              filter(searchedText);
+            }
+            //yazdikca filtrele...Burda dikkat et yazdikca filtrelioyr...
+            //Burada olan şey şu: TextField sen yazdıkça onChanged callback’ini tetikliyor ve içine otomatik olarak yazdığın anki metni gönderiyor.
+            // 1) onChanged: filter nasıl çalışıyor?(String nasıl geliyor?)
+            //TextField’ın onChanged parametresi şu tiptedir:ValueChanged<String> onChanged
+            //Bu da şu demek:Bu fonksiyon String alacak ve bir şey yapacak.Yani sen şunu yazmış oldun:onChanged: (String text) {filter(text);}
+            //Ama Dart’ta şöyle bir kısayol var:Eğer fonksiyonun imzası uyuyorsa (filter String alıyorsa),onChanged: filter yazınca otomatik bağlar.
+            //Senin filter fonksiyonun zaten böyle:void filter(String query) { ... }
+            //İmza uyuyor → TextField yazdıkça query parametresine yazdığın metin geliyor.
+            //Bu yöntem “yazdıkça arama”dır.İstersen “Enter’a basınca ara” mantığı için onSubmitted kullanılır.
+            //TextField her tuşa bastığında kendi içindeki metni günceller ve o güncel metni onChanged callback’ine gönderir.
+            // Yani bu: onChanged: filter,şunun aynısı:onChanged: (text) {  filter(text); // text = o anki yazı},
+            //Bu “otomatik gönderme” olayı TextField’ın kendi davranışı.
+            //controller: searchCtrl ne işe yarıyor?Controller şunu sağlar:
+            //TextField’ın mevcut metnini dışarıdan okuyabilirsin: searchCtrl.text-TextField’ın metnini dışarıdan değiştirebilirsin: searchCtrl.text = ""
+            //clear() yapabilirsin: searchCtrl.clear()
+            //Ama onChanged’in çalışması için controller şart değil.
+            //Mini Ozet:onChanged → “kullanıcı yazdı, sana yeni text’i haber veriyorum”
+            // controller → “TextField’ın text’ine dışarıdan erişmek / değiştirmek istiyorsan kullan”
+          )
+          : const Text("Appbar Serach"),
+          actions: [
+            //Ve search ikonuna basınca:arama aç/kapa,kapanınca text’i temizle ve listeyi resetle
+
+            //Arama yapiliyor ise cancel iconu goster, arama yapilmyr ise search iconu goster
+            isSearching ?  IconButton(icon: const Icon(Icons.cancel), onPressed: ()
+            {
+              setState(() {
+                isSearching = !isSearching;//cancel butonna tiklaninca arama bitirsin isSearch tersine doner...
+                if (!isSearching) {
+                  searchCtrl.clear();
+                  filteredPeople = List.from(people); // aramayı kapatınca reset
+                }
+              });
+              print("cancelll!!");
+            }) :  IconButton(
+              icon:const Icon(Icons.search),
+              onPressed: (){
+                print("search!!!");
+                setState(() {
+                  isSearching = !isSearching;
+                 /*  if (!isSearching) {
+                    searchCtrl.clear();
+                    filteredPeople = List.from(people); // aramayı kapatınca reset
+                  }*/
+                });
+              },
+            ) ,
+
+            IconButton(icon: const Icon(Icons.more_vert), onPressed: () {
+              print("settings!!");
+            }),
+          ],
+      ),
+        //The following RangeError was thrown building:
+      // RangeError (length): Invalid value: Only valid value is 0: 1 boyle bir hata aldim sebeb i nedir?
+      //Bir listede olmayan index’e erişmeye çalışmışsın.Örn: listenin length’i 1 iken sen [1] istiyorsun. (tek eleman varsa index sadece 0 olur)
+      //Arama senaryosunda bu hata genelde şu yüzden olur:Sen filteredPeople ile listeyi çiziyorsun ama bir
+      // yerde hâlâ people[i] gibi başka listeyi index’liyorsun.
+      // Örneğin bu çok klasik hata:final p = filteredPeople[i]; // doğru onTap:(){ final original = people[i]; // ❌ yanlış! filtered ile people indexleri aynı olmayabilir
+      //Filter sonrasi filteredPeople.length 1 olablir ama people[i] demeye calisinca patlar
+      //RangeError kesin çözüm (doğru index kullan)ListView içinde sadece filteredPeople kullanıyorsan, onTap içinde de onunla git:
+      //Ama güncelleme/silme gibi işlemde “asıl liste”yi değiştirmek istiyorsan:filtered item’ın people içindeki gerçek index’ini bulman gerekir.
+      //Örnek: silme için doğru yöntem final p = filteredPeople[i]; final realIndex = people.indexOf(p); // aynı map referansı ise çalışır
+      //setState(() {
+      //   people.removeAt(realIndex);
+      //   filteredPeople = List.from(people); // veya tekrar filter(searchCtrl.text)
+      // });
+      //BU SEKILDEE KULLAN!!!!!!!!!!!!!
+      // // people[i] = {"name": value.person_name, "phone": value.person_tel};  yerine  final realIndex = people.indexOf(p);
+      // people[realIndex] = {"name": value.person_name, "phone": value.person_tel};
         body: Padding(
           padding: const EdgeInsets.all(12),
           child: ListView.builder(
-            itemCount: people.length,
+           // itemCount: people.length,
+            itemCount: filteredPeople.length,
             itemBuilder: (context, i) {
-               final p = people[i];
+              // final p = people[i];
+               final p = filteredPeople[i]; //filtered i bassin diyoruz simdide.
+               //filteredPeople = ekranda gösterdiğin liste (filtreli hali)
+               //Çünkü arama yapınca:people’dan eleman “silmek” istemiyoruz
+               // sadece ekranda “şimdilik” az gösteriyoruz ama Arama bittiğinde:
+               // tekrar full listeye dönmek istiyoruz..filteredPeople = List.from(people); bu da demek oluyor ki:“Başlangıçta ekranda herkesi göster.”
                print("p::${p}");
                return GestureDetector(
                  onTap: (){
                    //Simdi burda tiklanan datayi bizim person_Detail sayfaisna gondermemiz gerekioyr yani parent dan childa
                    // data gonderecgiz o zaman push ile constructora data gondeririz
-                   Person person = Person(person_id:1,person_name:p["name"]! , person_tel: p["phone"]!);
+                   int person_id = i +1;
+                   Person person = Person(person_id: person_id, person_name: p["name"]!, person_tel: p["phone"]!);
+                  // Person person = Person(person_id: 1, person_name: "Haakan", person_tel: "532456442");
+                   //The argument type of object can not assigned to the parameter type int?
+                   //Person(person_id: p["id"]!,person_name:p["name"]! , person_tel: p["phone"]!);
                    Navigator.push(context, MaterialPageRoute(builder: (context)=>DetailPage(person:person)))
+                   //BURAYA DIKKAT VERI TRANSFERI YAPTIGMZ ICIN DETAILPAGE IN BASINA CONST KOYAMAYIZ..
                        .then((value){
                           print("value-comesfrom-detail-page: ${value}");
                          /* if (value != null && value is Map<String, String>) {//
@@ -59,14 +258,22 @@ class _HomepageState extends State<Homepage> {
                           if (value is Person) {
                             setState(() {
                               // people listen Map ise (senin şu anki yapı):
-                              people[i] = {"name": value.person_name, "phone": value.person_tel};
+                              //Aslinda normalde people icindeki id ile value den gelen id yi eslestirip peopla da hangi id ye denk geliyrsa
+                              // ona ait degerleri degsitirebiliriz ama burda index uzerinden ypamisiz bu da dogru bir yaklasimdir
+
+                              final realIndex = people.indexOf(p);
+                              // people[i] = {"name": value.person_name, "phone": value.person_tel};
+                              //yerine
+                               people[realIndex] = {"name": value.person_name, "phone": value.person_tel};
+                               print("realIndex: ${realIndex}");
+                               print("filteredPerson: ${filteredPeople}");
                             });
 
                           }
                       /*
                       paramtreyei person class i uzerinden gondermeye calistimgzda .then de hata aldik:48:25: Error: The method 'then' isn't defined for the type 'MaterialPageRoute<dynamic>'.
- - 'MaterialPageRoute' is from 'package:flutter/src/material/page.dart' ('../../../flutter/packages/flutter/lib/src/material/page.dart').
-Try correcting the name to the name of an existing method, or defining a method named 'then'.
+                       - 'MaterialPageRoute' is from 'package:flutter/src/material/page.dart' ('../../../flutter/packages/flutter/lib/src/material/page.dart').
+                      Try correcting the name to the name of an existing method, or defining a method named 'then'.
                        .then((value){
                        bu hata nedir nasil cozulur!!!
                        Hata mesajın %100 parantez hatası yüzünden geliyor:
@@ -139,7 +346,13 @@ Try correcting the name to the name of an existing method, or defining a method 
                           icon: const Icon(Icons.close),
                           onPressed: () {
                               // silme işlemi: (StatefulWidget içinde)
-                              // setState(() => people.removeAt(i));
+                            final realIndex = people.indexOf(p);
+                               setState(()
+                                 {
+                                    people.removeAt(realIndex);
+                                    filteredPeople = List.from(people); // veya tekrar filter(searchCtrl.text)
+                                 }
+                               );
                                     },
                                 ),
                     ],

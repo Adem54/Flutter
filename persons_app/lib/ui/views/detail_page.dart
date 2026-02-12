@@ -5,7 +5,8 @@ class DetailPage extends StatefulWidget {
  // String personName;
  // String personNumber;
   Person person;
-
+//Bestpractise...person instancesi bize homepage den navigator araciligi ile gonderilecek,
+// ve bu person a asagida widget nesnesi uzerinden erisebilecegiz
   DetailPage({required this.person}); //DetailPage({required this.personName, required this.personNumber});
 
 
@@ -19,9 +20,10 @@ class _DetailPageState extends State<DetailPage> {
   var tfPersonName = TextEditingController();
   var tfPersonNumber = TextEditingController();
 
-  Future<void> Update(String person_name, String person_number) async {
-      print("update-person_name and- person-number: ${person_name} - ${person_number}");
+  Future<void> Update(int person_id, String person_name, String person_number) async {
+      print("update-person_name and- person-number: ${person_id} - ${person_name} - ${person_number}");
   }
+  //Burda biz update requesti gonddrerek endpointe database de bu data nin guncellenmesini salgayacagiz
 
   @override
   void initState() {
@@ -30,6 +32,9 @@ class _DetailPageState extends State<DetailPage> {
     print("initState!!!");
 
     // ✅ DetailPage’e gelen veriyi TextField’lara bas..DIKKAT EDELIM DetailPage E  GELEN VERYI BIZ widget. diyerek erisebiliyoruz
+    //Burasi harika bir bestpractise, sayfa acildiginda buraya gonderilen datayi aliyor ve hemen o datalari textfield valuelerine
+    // tfPersonName.text e gelen name datasina widget.person.person_name uzerinden erisip atama yapyor ki sayfaya gelir gelmez
+    // ilk bu atamayi yapsin sonra sayfayi acsin ki textfield lar bos olarak acilmamis olsun
     tfPersonName.text = widget.person.person_name;
     tfPersonNumber.text = widget.person.person_tel;
     //✅ Böyle yapınca sayfa açılır açılmaz TextField’lar dolu görünür.
@@ -61,8 +66,9 @@ class _DetailPageState extends State<DetailPage> {
                         var personName = tfPersonName.text;
                         print("tfPersonName: ${tfPersonNumber.text}");
                         var personNumber = tfPersonNumber.text;
-                        Update(personName, personNumber);
-                        //
+                        //Dikkat edelim burda bize tfPersonName.text en guncel veri ne ise, en guncel ne girilmis ise onu verecektir
+                        Update(widget.person.person_id, personName, personNumber);
+                        //Guncelleme bildigmz gibi id uzerinden olmalidir,
                         final updatedPerson = Person(
                           person_id: widget.person.person_id, // id aynı kalsın
                           person_name: tfPersonName.text,
