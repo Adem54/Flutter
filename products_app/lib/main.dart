@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:persons_app/ui/views/homepage.dart';
-import 'package:persons_app/ui/views/homepage2.dart';
+import 'package:products_app/ui/views/products.dart';
+import 'package:products_app/ui/views/products2.dart';
+import 'package:products_app/ui/views/products3.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,8 +20,7 @@ class MyApp extends StatelessWidget {
 
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      //home: const Homepage(),
-      home: const Homepage2(),
+      home: Products3(),
     );
   }
 }
