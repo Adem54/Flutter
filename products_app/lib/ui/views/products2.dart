@@ -114,7 +114,6 @@ Future<List<Product>> fetchProducts() async{
                 return GestureDetector(
                   onTap:(){
                     print("tapped...Product-detail!!!!!!");
-
                     Navigator.push(context, MaterialPageRoute(builder: (context)=>ProductDetail(product:product)));
                     //Buraya tiklayinca ...navigator calisti ama boylede bir console a mesaj geldi zaten diger sayfaya gecmesi biraz zaman aldi..
                     //I/Choreographer(19877): Skipped 96 frames!  The application may be doing too much work on its main thread.
@@ -210,7 +209,6 @@ Future<List<Product>> fetchProducts() async{
               child: const Text("There is no product-data"),
             );//Bazen ); hata gelir sadece ;  kaldir geri yaz hata kaybolur
           }
-
         }
       )
     );
