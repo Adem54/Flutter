@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:persons_app/data/entity/person.dart';
+import 'package:persons_app/ui/cubit/detail_page_cubit.dart';
 
 class DetailPage extends StatefulWidget {
  // String personName;
@@ -20,10 +22,6 @@ class _DetailPageState extends State<DetailPage> {
   var tfPersonName = TextEditingController();
   var tfPersonNumber = TextEditingController();
 
-  Future<void> Update(int person_id, String person_name, String person_number) async {
-      print("update-person_name and- person-number: ${person_id} - ${person_name} - ${person_number}");
-  }
-  //Burda biz update requesti gonddrerek endpointe database de bu data nin guncellenmesini salgayacagiz
 
   @override
   void initState() {
@@ -67,7 +65,10 @@ class _DetailPageState extends State<DetailPage> {
                         print("tfPersonName: ${tfPersonNumber.text}");
                         var personNumber = tfPersonNumber.text;
                         //Dikkat edelim burda bize tfPersonName.text en guncel veri ne ise, en guncel ne girilmis ise onu verecektir
-                        Update(widget.person.person_id, personName, personNumber);
+                        //context.read i biz flutter_bloc import sayesinde okuruz ve DetailPageCubit
+                        // sayesinde de DetailPageCubit icindeki Update methoduna erisir burdan
+                        context.read<DetailPageCubit>().Update(widget.person.person_id, personName, personNumber);
+
                         //Guncelleme bildigmz gibi id uzerinden olmalidir,
                         final updatedPerson = Person(
                           person_id: widget.person.person_id, // id aynı kalsın

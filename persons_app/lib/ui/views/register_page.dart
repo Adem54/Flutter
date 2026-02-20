@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:persons_app/ui/cubit/register_page_cubit.dart';
 import 'package:persons_app/ui/views/homepage.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -13,10 +15,6 @@ class _RegisterPageState extends State<RegisterPage> {
   var tfPersonNumber = TextEditingController();
   //TextEditingController sinifindan geliyor ve bu bize herhangi bir yerden veri okuyaiblmemizi saglar
 
-  //TextField a girilen datayi biz tabi ki endpoint e gondererek, ordan veritabanina kaydedecegiz, bu da buislemin asenkron oldugunu gosterir
-  Future<void> Save(String person_name, String person_number) async{
-        print("save the added person: ${person_name} - ${person_number}");
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +46,9 @@ class _RegisterPageState extends State<RegisterPage> {
                        var personName = tfPersonName.text;
                        print("tfPersonName: ${tfPersonNumber.text}");
                        var personNumber = tfPersonNumber.text;
-                       Save(personName, personNumber);
+                       //context.read i biz flutter_bloc import sayesinde okuruz ve RegisterPageCubit
+                       // sayesinde de RegisterPageCubit icindeki Save methoduna erisir burdan
+                       context.read<RegisterPageCubit>().Save(personName, personNumber);
                      // Navigator.push(context, MaterialPageRoute(builder: (context)=> Homepage(personName:personName,personNumber:personNumber)));
 
                        //push ile degil, de pop ile geldigi yere gonderecegiz ve bu sekiiolde de datayi eklemek icin..

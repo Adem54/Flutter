@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:persons_app/data/entity/person.dart';
+import 'package:persons_app/ui/cubit/homepage_cubit.dart';
 import 'package:persons_app/ui/views/detail_page.dart';
 import 'package:persons_app/ui/views/register_page.dart';
 
@@ -37,18 +39,18 @@ class _HomepageState2 extends State<Homepage2> {
   ];
 
   //AMA SIMDILK BIZ INTEGER OLAN DEGERI KALDIRALIM OK
+  //BIZ BURDAN FETCHPERSONS METHODUNU YORUMA ALDIK CUNKU ARTIK BIZ BUNU HOMEPAGECUBITTEN ALIIYORUZ...
+  /*
   Future<List<Person>> fetchPersons() async {
     var personList = <Person>[];
-    var person1 =  Person(person_id:1, person_name: "Adeem", person_tel: "555 111 22 33");
+    var person1 =  Person(person_id:1, person_name: "Adem", person_tel: "555 111 22 33");
     var person2 =  Person(person_id:2, person_name: "Zeynep", person_tel: "444 666 888 11");
     var person3 =  Person(person_id:3, person_name: "Zehra", person_tel: "222 333 999 01");
     personList.add(person1);
     personList.add(person2);
     personList.add(person3);
-
     return personList;
-
-  }
+  } */
 
   late Future<List<Person>> personsFuture;
   List<Person> persons = [];
@@ -59,10 +61,10 @@ class _HomepageState2 extends State<Homepage2> {
   // ya da git onu nullable yap derler adama
   bool isSearching = false;
   final TextEditingController searchCtrl = TextEditingController();
-
+/*
   Future<void> deletePerson(int person_id) async{
       print("delete-person_id: ${person_id}");
-  }//Baksana ben burda ; kullaninca hata aliyorum..ve expected class member vs yaziyor ama ; u kaldirinca hata da kalkiyor
+  } *///Baksana ben burda ; kullaninca hata aliyorum..ve expected class member vs yaziyor ama ; u kaldirinca hata da kalkiyor
  /*
  * Method class scope’ta olmalı-Yani _HomepageState2 sınıfının içinde, ama build() dışında:
  * “; koyunca hata alıyorum, kaldırınca kalkıyor” ne demek?
@@ -82,11 +84,21 @@ Sen ; koyunca Dart onu “bu bir declaration (bildirim), gövde yok” gibi alg�
   void initState() {
     // TODO: implement initState
     super.initState();
-    personsFuture = fetchPersons().then((list) {
+
+    //Simdi nasil aldik biz personListimzi ona bakalim, uygulama calisinca bu sayfay gelince initState ilk calisyrdu, ve buraya gleiyor ve
+    // HomePageCubit te fetchPersons u cagiriyor, calistiriyor orda da personList i repostorydeki methodu cagirarak personListi alikyor
+    // ve de hemen listeyi alir almaz da emit ile bu listeyi tekrar bu sayfaya gonderiyor, yani emit ile gonderdigi icin artik
+    // bizim personListi bu sayfada FutureBuilder ile degil BlockBuilder almamiz gerekiyor ki
+    // HomepageCubitten emit edilen personlistesini dinleyebilelim ve yakalayabilelim
+    context.read<HomepageCubit>().fetchPersons();
+    //Simdi ne yapiyruz HomepageCubitimizden degerimizi burda aliyoruz
+    /*
+    personsFuture = fetchPersons().then((list)
+    {
       persons = list;
       filteredPersons = List.from(persons);
       return list; // ✅ Future<List<Person>> beklediği için list dön
-    });
+    }); */
 
     filteredPeople = List.from(people); // başlangıçta hepsi görünsün
   }
@@ -94,6 +106,8 @@ Sen ; koyunca Dart onu “bu bir declaration (bildirim), gövde yok” gibi alg�
   //Bu fonksiyon yazdığın arama kelimesine göre listeyi daraltıyor:query boşsa → herkes görünsün,query doluysa → name veya phone içinde geçenleri göster
   //setState koymamın sebebi:Liste değişti → UI yeniden çizilsin.
   //where = filtrele, contains = içinde geçiyor mu?
+
+  //BU ARAMA ISLEMINI DE BIZ YINE HOMPEAGE CUBITTEN CAGIRACAGIZ...ORDA DA REPOSTORYDEN CAGIRILACAK
   Future<void> filter(String query) async {
     print("query!!!!!!: ${query}");
     //kullanici search yaparken texfield-input a girdigi text anlik olarak buryaa geliyor
@@ -118,61 +132,11 @@ Sen ; koyunca Dart onu “bu bir declaration (bildirim), gövde yok” gibi alg�
     super.dispose();
   }
   // dispose() nedir, niye yaparız?
-  /*
-  *Flutter’da bazı şeyler “kaynak” kullanır:
-TextEditingController
-AnimationController
-FocusNode
-StreamSubscription vs.
-Bunlar arkada:
-listener tutar,
-hafıza (memory) kullanır,
-bazen klavye/focus gibi sistem kaynaklarına bağlanır.
-Sayfa kapandığında (widget ekrandan gidince) bu kaynakları serbest bırakmazsan:
-memory leak gibi gereksiz kaynak kullanımı olur,
-“A TextEditingController was used after being disposed” gibi hatalar görebilirsin,
-özellikle uygulama büyüyünce performans düşebilir.
-* O yüzden:
-* @override
-void dispose() {
-  searchCtrl.dispose(); // ✅ controller'ı kapat
-  super.dispose();      // ✅ Flutter'ın kendi temizliğini de çalıştır
-}
-Özet: “Bu sayfa öldü, controller’ı da öldür.”
-   */
-
-
   @override
   //peki neden actions kullanilyor action s icerisinekoyduklarmz ile persons yazisin text icinde de
   // appBar icindeki ttile yanyana oyle mi ayrica peki bunlar ayni hizada mi bulunuyor peki dikey de
   // ve yatay da da neye gore hizalaniyor bunlara bizde ayarlama yapaiblikr miyiz hizalama konusunda
-  /*
-1) title ile actions yan yana mı?
-Evet, pratikte aynı yatay satırda gibi düşün:
-title: → solda (leading’den sonra kalan alanda)
-actions: → sağda (en sağda, yan yana ikonlar)
-Ama teknik olarak AppBar kendi layout’uyla bunları yerleştiriyor (Row gibi).
-2) Aynı hizada mı (dikey/yatay)?
-Evet:
-Dikeyde: AppBar’ın yüksekliğinin ortasına göre hizalanırlar (center-ish).
-Yatayda: actions elemanları sağa yaslanır ve yan yana dizilir.
-Sen ekstra bir şey yapmasan bile “güzel hizalı” durmasının sebebi AppBar’ın bunu standartlaştırması.
-Hizalamayı biz ayarlayabilir miyiz?
-Evet, birkaç yaygın ayar var:Başlığı ortalamak (Android’de default sola yakın, iOS’ta ortalı olabilir)
-centerTitle: true,
-B) Title ile actions arasında boşluğu kontrol etmek
-actions ikonlarının sağa yaslanma/padding’ini kontrol için:
-actionsPadding: const EdgeInsets.only(right: 8),
-(Flutter sürümüne göre actionsPadding varsa kullanırsın; yoksa Padding ile sararsın.)
-Action ikonlarını daha farklı hizalamak (çok gerekmez)-actions içine Row, Center, Align koyabilirsin ama çoğu zaman gerek yok:
-AppBar yüksekliğini değiştirmek-toolbarHeight:70
-Kısa özet (notluk)
-title solda başlık
-actions sağda ikon/buton alanı
-Aynı satırdalar, dikeyde otomatik ortalanırlar
-centerTitle, toolbarHeight, Padding ile ince ayar yaparsın
 
-  * */
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -188,24 +152,12 @@ centerTitle, toolbarHeight, Padding ile ince ayar yaparsın
             ),
             //onChanged: filter,//Bu islem ile alttaki islem ayni seydir aslinda
             onChanged:(searchedText){
-              filter(searchedText);
+             // filter(searchedText);
+              //Artik bu filter islemini biz, ne yapariz gidip HomepageCubit icinden cagiririz oray i tetikleriz..!!!!
+              context.read<HomepageCubit>().search(searchedText);
             }
             //yazdikca filtrele...Burda dikkat et yazdikca filtrelioyr...
             //Burada olan şey şu: TextField sen yazdıkça onChanged callback’ini tetikliyor ve içine otomatik olarak yazdığın anki metni gönderiyor.
-            // 1) onChanged: filter nasıl çalışıyor?(String nasıl geliyor?)
-            //TextField’ın onChanged parametresi şu tiptedir:ValueChanged<String> onChanged
-            //Bu da şu demek:Bu fonksiyon String alacak ve bir şey yapacak.Yani sen şunu yazmış oldun:onChanged: (String text) {filter(text);}
-            //Ama Dart’ta şöyle bir kısayol var:Eğer fonksiyonun imzası uyuyorsa (filter String alıyorsa),onChanged: filter yazınca otomatik bağlar.
-            //Senin filter fonksiyonun zaten böyle:void filter(String query) { ... }
-            //İmza uyuyor → TextField yazdıkça query parametresine yazdığın metin geliyor.
-            //Bu yöntem “yazdıkça arama”dır.İstersen “Enter’a basınca ara” mantığı için onSubmitted kullanılır.
-            //TextField her tuşa bastığında kendi içindeki metni günceller ve o güncel metni onChanged callback’ine gönderir.
-            // Yani bu: onChanged: filter,şunun aynısı:onChanged: (text) {  filter(text); // text = o anki yazı},
-            //Bu “otomatik gönderme” olayı TextField’ın kendi davranışı.
-            //controller: searchCtrl ne işe yarıyor?Controller şunu sağlar:
-            //TextField’ın mevcut metnini dışarıdan okuyabilirsin: searchCtrl.text-TextField’ın metnini dışarıdan değiştirebilirsin: searchCtrl.text = ""
-            //clear() yapabilirsin: searchCtrl.clear()
-            //Ama onChanged’in çalışması için controller şart değil.
             //Mini Ozet:onChanged → “kullanıcı yazdı, sana yeni text’i haber veriyorum”
             // controller → “TextField’ın text’ine dışarıdan erişmek / değiştirmek istiyorsan kullan”
           )
@@ -220,7 +172,23 @@ centerTitle, toolbarHeight, Padding ile ince ayar yaparsın
                 isSearching = !isSearching;//cancel butonna tiklaninca arama bitirsin isSearch tersine doner...
                 if (!isSearching) {
                   searchCtrl.clear();
-                  filteredPeople = List.from(people); // aramayı kapatınca reset
+                 // filteredPeople = List.from(people); // aramayı kapatınca reset
+                  context.read<HomepageCubit>().search(""); // ✅ full listeye dön
+                  //“Cancel’da niye fetchPersons çağırmıyoruz da search(“”) diyoruz?”
+                  //Sebep A: Fetch = tekrar veri çekmek (pahalı / gereksiz)fetchPersons() repo’ya gider (DB/API).
+                  //Cancel’a basınca amacın:yeni veri çekmek değil,mevcut veriyi tekrar full göstermek
+                  //O yüzden en hızlı:search(""); Bu _allPersons’tan full listeyi emit eder.
+                  //Sebep B: Search state’ini bozmaz
+                  //Sen _allPersons’ı zaten en son fetch’te doldurmuştun. Cancel’da tekrar fetch yapmak:
+                  //gereksiz network/db..gereksiz gecikme
+                  // bazen server’dan değişmiş data getirip UI’ı “zıplatabilir”
+                  //Doğru olan: “aramayı kapat → local full listeye dön”.
+                  //Mini not: Peki ne zaman fetch tekrar çağrılır?
+                  //Şu durumlarda:
+                  // Sayfayı “pull to refresh” ile yenilemek istersin
+                  // Register’dan geri dönünce “server’dan tekrar çekmek” istersin
+                  // DB’de dışardan değişiklik olduysa yeniden okumak istersin
+                  // Onun dışında cancel/search temizlemede genelde fetch yapılmaz.
                 }
               });
               print("cancelll!!");
@@ -244,38 +212,39 @@ centerTitle, toolbarHeight, Padding ile ince ayar yaparsın
           ],
       ),
         //The following RangeError was thrown building:
-      // RangeError (length): Invalid value: Only valid value is 0: 1 boyle bir hata aldim sebeb i nedir?
-      //Bir listede olmayan index’e erişmeye çalışmışsın.Örn: listenin length’i 1 iken sen [1] istiyorsun. (tek eleman varsa index sadece 0 olur)
-      //Arama senaryosunda bu hata genelde şu yüzden olur:Sen filteredPeople ile listeyi çiziyorsun ama bir
-      // yerde hâlâ people[i] gibi başka listeyi index’liyorsun.
-      // Örneğin bu çok klasik hata:final p = filteredPeople[i]; // doğru onTap:(){ final original = people[i]; // ❌ yanlış! filtered ile people indexleri aynı olmayabilir
-      //Filter sonrasi filteredPeople.length 1 olablir ama people[i] demeye calisinca patlar
-      //RangeError kesin çözüm (doğru index kullan)ListView içinde sadece filteredPeople kullanıyorsan, onTap içinde de onunla git:
-      //Ama güncelleme/silme gibi işlemde “asıl liste”yi değiştirmek istiyorsan:filtered item’ın people içindeki gerçek index’ini bulman gerekir.
-      //Örnek: silme için doğru yöntem final p = filteredPeople[i]; final realIndex = people.indexOf(p); // aynı map referansı ise çalışır
-      //setState(() {
-      //   people.removeAt(realIndex);
-      //   filteredPeople = List.from(people); // veya tekrar filter(searchCtrl.text)
-      // });
+
       //BU SEKILDEE KULLAN!!!!!!!!!!!!!
       // // people[i] = {"name": value.person_name, "phone": value.person_tel};  yerine  final realIndex = people.indexOf(p);
       // people[realIndex] = {"name": value.person_name, "phone": value.person_tel};
-
-
       //Tutor ise FutureBuilder<List<Person>> kullandigini performansli sekiklde verileri getirmek istedginde bunu kullandigiji soyledi..
       //yukardaki Future<List<Person>> methodu bu tipteki veriyi dondurdugu icin, FutureBuilder<List<Person>> bu sekilde
       //Simdi ok yani biz datayi uzak api den alacagimz dan dolayi bu yontem ile datayi guvenli bir sekilde aliriz data nin gelmeme durumna
       // gore de durumun handle edecek sekiklde kendimzi ayarlaabiliyoruz...
-        body: FutureBuilder<List<Person>>(
+      //homepage_cubitten gonderilen-emit edilen personlistesini dinleyebilmek icin(.on mantiginda) alabilmek icin
+      // burayi BlockBuilder ile sarmalayacagiz FutureBuilder yerine
+        //body: FutureBuilder<List<Person>>(
+      body: BlocBuilder<HomepageCubit,List<Person>>(
+        //Blockbuilder 1.param:Hangi cubit, 2.paramtre o cubit hangi type i aliyor(class HomepageCubit extends Cubit<List<Person>>)
+        //Blockbuilder kullnadigmz icin future:personFeature veya fetchPersons() buna gerek yok artik bunu kullanmayacagiz bu FutureBuilder de ihityac vardi
          // future: fetchPersons(),
-          future:personsFuture,
-          builder:(context, snapshot){
+         // future:personsFuture,
+        //Burda context, tin yaninda direk olarak BlockBuilder ile sarmaladgimz icin biz homepage_cubitten
+        // emit edilen gonderilen personList i alacagiz context in yaninda
+          builder:(context, personList){//snapshot yerine personList yazdik sadece..snapshotta kalabilirdi..
+            // ama biz emit ile gonderilen tetikelknen degeri dinledgimzi gostermek icin yaptik
+            if(personList.isNotEmpty) {//simdi personList homepage_cubitten geldigi icin orda data getirildi, sadece o data buraya emit edildi..
+              // yani biz burda data var mi diye kontrolu artik aslinda direk repostory de yapilacak daata nin fetch edildigi yer orasi
+              // ve ordan bize direk olarak personList in kendisi gonderiliyor zaten,
+              // ve default olarak da zaten [] atanmisti dolayisi ile artik BlocBuilder ile isEmpty veya isNotEmpty kontrolu yapacagiz
             //snapshot ile data var mi getirecegi data var mi onu kontrol ediyor
-            if(snapshot.hasData) {//Eger data var ise o zaman listelemeyi yapabilirz diyoruz...
-                var personList = snapshot.data;
+            //if(snapshot.hasData) {//Eger data var ise o zaman listelemeyi yapabilirz diyoruz...
+               // var personList = snapshot.data; Biz zaten personList i aldigimz icin buna BlocBuilder icinde gerek yok artik,
+              // bu da FutureBuilder de ihtiyac olan birseydi
                 //datayi aldiktan sonra bu datayi ListView.builder uzerinden listeleyecegiz...
                 return ListView.builder(
-                   itemCount: personList!.length,//personList in null gelme durumunda patlamamasi icin..
+                  // itemCount: personList!.length,//personList in null gelme durumunda patlamamasi icin..
+                  itemCount: personList.length,//Artik Blocbuilder kullandgimz icin personList!.length unleme e gerek yok,
+                  // personList!.length FutureBuilder icin gecerli idi
                     itemBuilder:(context, index){
                      //itemBuilder itemCount taki lengt e  gore calisiyor bak dikkat
                       var person = personList[index];
@@ -288,6 +257,10 @@ centerTitle, toolbarHeight, Padding ile ince ayar yaparsın
                           Navigator.push(context, MaterialPageRoute(builder: (context)=>DetailPage(person:person)))
                               .then((value){
                                 print("you come back to Homepage2");
+                                //Ana sayfaya geri donuldugunde de biz List<Person> listesini veritabanindan fetch edecek fonks cagiraagiz ki
+                                // detailpage de update islemi yapilabiliyrdu eger herangi bir update islemi gerceklesmis ise database
+                                // de o degisiklkleri hemen alarak kullanicya ui da gosterebilmek icin
+                                context.read<HomepageCubit>().fetchPersons();
                             print("value-comesfrom-detail-page: ${value}");
                             if (value is Person) {
                               setState(() {
@@ -295,7 +268,7 @@ centerTitle, toolbarHeight, Padding ile ince ayar yaparsın
                                 //Aslinda normalde people icindeki id ile value den gelen id yi eslestirip peopla da hangi id ye denk geliyrsa
                                 // ona ait degerleri degsitirebiliriz ama burda index uzerinden ypamisiz bu da dogru bir yaklasimdir
 
-                                // ✅ asıl listeyi güncelle..simdi dikat yukarda Listview icinde donmesi icinkullanilan
+                                //  asıl listeyi güncelle..simdi dikat yukarda Listview icinde donmesi icinkullanilan
                                 // personList icerisinde biz gidip de update-delete islemini yapmamiz dogru degil,
                                 // bizim bu isi en ustte tanimladigimz persons veya peopla her ne ise ana liste
                                 // uzerinden yapammiz gerekiyor bunu bilelim...iste bu diger react vs ye gore burda biraz daha farkli isliyor
@@ -310,9 +283,7 @@ centerTitle, toolbarHeight, Padding ile ince ayar yaparsın
                                   filteredPersons[visibleIndex] = value;
                                 }
 
-
                               });
-
                             }
                           });
                         },
@@ -354,23 +325,25 @@ centerTitle, toolbarHeight, Padding ile ince ayar yaparsın
                                             // personList icerisinde biz gidip de update-delete islemini yapmamiz dogru degil,
                                             // bizim bu isi en ustte tanimladigimz persons veya peopla her ne ise ana liste
                                             // uzerinden yapammiz gerekiyor bunu bilelim...iste bu diger react vs ye gore burda biraz daha farkli isliyor
-                                            final realIndex = persons!.indexWhere((p) => p.person_id == person.person_id);
-                                            deletePerson(person.person_id);
+                                            //final realIndex = persons!.indexWhere((p) => p.person_id == person.person_id);
+                                            final realIndex = persons.indexWhere((p) => p.person_id == person.person_id);//Arrtik direk List<Perosn> u cubit ten aldigmz icin ! ile null kontrolune gerek yok
+                                            context.read<HomepageCubit>().deletePerson(person.person_id);
+                                            //HomepageCubit teki deletePerson methodunu tetikleriz o da gidip veritabani islemlerini yaptigmz
+                                            // ortak methodlari barindirdigmz yer olan repostory deki deletePerosn i tetikler ve delete islemimiz
+                                            // bu sekilde veritabaninda gerceklesmis olur
+
                                             setState(()
-                                            {
+                                                {
 
-                                              //Delete islemi, delete request gondeririz aslinda veri tabanina
-                                              if (realIndex != -1) {
-                                                persons.removeAt(realIndex);
-                                              }
+                                                  //Delete islemi, delete request gondeririz aslinda veri tabanina
+                                                  if (realIndex != -1) {
+                                                    persons.removeAt(realIndex);
+                                                  }
 
-                                            }
+                                                }
                                             );
                                             ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(content: const Text("Deleted"),)
-
-
-
                                             );
 
                                           //Delete request must be triggered..async delete func must be deleted!
@@ -422,6 +395,11 @@ centerTitle, toolbarHeight, Padding ile ince ayar yaparsın
             // nerden gitti ise geri gelirkende orasi uzerinde tetiklenecek!!
             //BURASI COK ONEMLI...SAYFA YA GERI DONULDUGUNDE BIZIM YAPMAK ISTEDGIMZ ISLEMLER OLACAK
                 print("you come back to homepage-value: ${value}");
+                //Ana sayfaya geri donuldugunde de biz List<Person> listesini veritabanindan fetch edecek fonks cagiraagiz ki
+                // register page de insert islemi yapilabiliyrdu eger herangi bir insert islemi gerceklesmis ise database
+                // de o degisiklkleri hemen alarak kullanicya ui da gosterebilmek icin
+                context.read<HomepageCubit>().fetchPersons();
+                
                 // you come back to homepage-value: {name: Zeynep Erbas, phone: 450343434}
                 if(value != null && value is Map<String,String>){
                   setState(() {

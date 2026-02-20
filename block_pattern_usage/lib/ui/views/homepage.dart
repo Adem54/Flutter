@@ -28,6 +28,7 @@ class _HomepageState extends State<Homepage> {
               //HomepageCubit icindeki emit her tetiklendiginde, veya calistiginda burasi ordan gonderilen burda dinliyor ve aliyor gonderilen datayi
               //Ilk olarak sayfa geldiginde BlocBuilder de okunuyor HomepageCubit e gider ve onu constructori claisir ve
               // orda defaultolarak atanan degeri okur ve onu result a atama yapar...
+              //Bizdde verimizi Text icine almamiz gerektigi icin bu Text e secip alt-enter yaparak BlockBuilder<HomepageCubit,int> ile sarmaladik!!
               BlocBuilder<HomepageCubit,int>(//<HomepageCubit,int> hangi cubit dinlenecek ve return edecegi veri turu...
                builder:(context, result){
                  print("emmitted-result!!: ${result}");
@@ -99,7 +100,8 @@ class _HomepageState extends State<Homepage> {
                           textFeildNum2.text = "";
                         }); */
                         //Iste Cubit teki methodumzu da burda butona tiklayinca tetikleriz...
-                        context.read<HomepageCubit>().sum(textFeildNum1.text, textFeildNum2.text);//read blockpattern yapisindan gelecektir eger gelmiyorsa yukarda blocpattern
+                        context.read<HomepageCubit>().sum(textFeildNum1.text, textFeildNum2.text);
+                        //read blockpattern yapisindan gelecektir eger gelmiyorsa yukarda blocpattern
                         // import u kontorl etmemiz gerekir..flutter_bloc
                       }, child: const Text("Sum", style:TextStyle(color:Colors.white))),
                   ElevatedButton(
