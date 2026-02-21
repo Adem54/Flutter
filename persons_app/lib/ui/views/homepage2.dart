@@ -272,7 +272,9 @@ Sen ; koyunca Dart onu “bu bir declaration (bildirim), gövde yok” gibi alg�
                                 // personList icerisinde biz gidip de update-delete islemini yapmamiz dogru degil,
                                 // bizim bu isi en ustte tanimladigimz persons veya peopla her ne ise ana liste
                                 // uzerinden yapammiz gerekiyor bunu bilelim...iste bu diger react vs ye gore burda biraz daha farkli isliyor
-                                final realIndex = persons!.indexWhere((p) => p.person_id == value.person_id);
+                              //  final realIndex = persons!.indexWhere((p) => p.person_id == value.person_id);
+                                 final realIndex = persons.indexWhere((p) => p.person_id == value.person_id);
+                                 //persons artik cubitten geldigi icin oradan person olarak geliyor ondna dolalyi artik ! kullanmamia gereki yok
                                 if (realIndex != -1) {
                                   persons[realIndex] = value;
                                 }
@@ -399,7 +401,7 @@ Sen ; koyunca Dart onu “bu bir declaration (bildirim), gövde yok” gibi alg�
                 // register page de insert islemi yapilabiliyrdu eger herangi bir insert islemi gerceklesmis ise database
                 // de o degisiklkleri hemen alarak kullanicya ui da gosterebilmek icin
                 context.read<HomepageCubit>().fetchPersons();
-                
+
                 // you come back to homepage-value: {name: Zeynep Erbas, phone: 450343434}
                 if(value != null && value is Map<String,String>){
                   setState(() {
