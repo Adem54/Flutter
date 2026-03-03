@@ -121,9 +121,9 @@ Sonra kullanima baktim...
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
-                            child: Image.asset("images/${movie.image}",
-                              fit: BoxFit.cover,
-                            ),
+                            /*child: Image.asset("images/${movie.image}",
+                              fit: BoxFit.cover,*/
+                            child:Image.network(movie.image, width: 80, height: 80, fit: BoxFit.cover),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 5),

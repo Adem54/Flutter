@@ -47,6 +47,10 @@ dependencies:
   flutter_bloc:  dikkat flutter ile ayni hizada olacak ve flutter_bloc: karsina birsey yazmassak son versiyonu alir ..
 * */
 /*
+SQL-LITE KULLANIM..
+Sql liste icin DBBrowser i indiririz orda bir tane database ve icine persons tablosu olusutrup iceriinddede 2-3 tane data ekleriz...
+sqllite tools da veritabani olusturunca bir dosya olusturuyor...o dosyayi biz flutter projemizde sql-lite kullanmak icin kullanacagiz
+
 KUTUPHANELERI EKLEMEYI UNUTMAYALIM-SQL LITE I KULLANACAGIMZ ICIN ONUN LA ILGLI path: ve sqflite kutphaneinsi ekleriz!!!!!!!
 * Sql lite i kullanabilmemiz icin pubspec.yaml da bir kutuphane ekleyecegiz:
 * sqflite ismindekutuphaenimizi flutter_bloc: altinda path:(kopyalama islemi yapmak icin veritabanina erismeye caliskren onunla ilgil
