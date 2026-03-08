@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "775046790681",
+    "project_id": "tutorial-bdc4d",
+    "storage_bucket": "tutorial-bdc4d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:775046790681:android:f89e38561c7dc19b5ff488",
+        "android_client_info": {
+          "package_name": "com.example.movies_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCzwYO_W-xu719S5uQaWPeLeYN4sRDedw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:775046790681:android:e613e3dc27ca00725ff488",
+        "android_client_info": {
+          "package_name": "com.example.persons_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCzwYO_W-xu719S5uQaWPeLeYN4sRDedw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
