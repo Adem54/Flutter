@@ -1,15 +1,16 @@
 class Movie {
-  int id;
+  String id;
   String name;
   String image;
   int price;
 
   Movie({required this.id, required this.name, required this.image, required this.price});
 
-  factory Movie.fromJson(Map<String, dynamic> json)
+  //key-DocumentId ye ait key olacagi icin once id ye atayaagiz ki biz idmize documentid yi atayabilelim...
+  factory Movie.fromJson(Map<dynamic, dynamic> json, String key)
   {
     return Movie(
-        id: json["id"] as int,
+        id: key,
         name: json["name"] as String,
         image: json["image"] as String,
         price:  json["price"] as int

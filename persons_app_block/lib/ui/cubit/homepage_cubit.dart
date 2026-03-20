@@ -55,7 +55,7 @@ class HomepageCubit extends Cubit<List<Person>> {
   //fetchPersons() içinde emit(...) → state değişir → BlocBuilder rebuild
   //search(query) içinde emit(...) → state değişir → BlocBuilder rebuild
   //Yani BlocBuilder “tek bir emit’i” değil, Cubit’ten gelen her yeni state’i dinler.
-  /*void search(String query) {
+  void search(String query) {
     final q = query.toLowerCase().trim();
 
     if (q.isEmpty) {
@@ -70,16 +70,9 @@ class HomepageCubit extends Cubit<List<Person>> {
     }).toList();
 
     emit(filtered);
-  } */
+  }
   //Bu search methodu nun database uzerinden cagrilmasi gerekli sartlar olusurda datatbase e gitmek gerekir
   // ise o zaman tabi ki biz bu islemin database de yapilacak kisini repostory ye yerlestirecegiz
-
-  //Yukardaki search veritabaninda dokunmadan yapilan search idi, simdi ise birde veritabani uzerinden yapilan searchi gorelim
-
-  Future<void> search(String searchText) async {
-    var filteredPersons = await personDaoRepo.search(searchText);
-    emit(List.from(filteredPersons));
-  }
 
   Future<void> deletePerson(int person_id) async {
     await personDaoRepo.deletePerson(person_id);
@@ -87,7 +80,7 @@ class HomepageCubit extends Cubit<List<Person>> {
     //Biz veritabaninda islemleri yaptik eyvallah ama hala ui da tum personlar duruyor
     // yani biz veritabaninda person silindikten sonra veritbaninin update edilmis List<Person>
     // in ui da da gelmesini istyoruz..ondan dolayyi tekrar person listesini fetch ederiz...BU COK ONEMLI BILELIM...
-    await fetchPersons();
+    await personDaoRepo.fetchPersons();
   }
 
 }

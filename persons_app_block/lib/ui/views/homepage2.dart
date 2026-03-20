@@ -331,7 +331,7 @@ Sen ; koyunca Dart onu “bu bir declaration (bildirim), gövde yok” gibi alg�
                                             //HomepageCubit teki deletePerson methodunu tetikleriz o da gidip veritabani islemlerini yaptigmz
                                             // ortak methodlari barindirdigmz yer olan repostory deki deletePerosn i tetikler ve delete islemimiz
                                             // bu sekilde veritabaninda gerceklesmis olur
-                                            /*
+
                                             setState(()
                                                 {
 
@@ -341,10 +341,11 @@ Sen ; koyunca Dart onu “bu bir declaration (bildirim), gövde yok” gibi alg�
                                                   }
 
                                                 }
-                                            );*/
+                                            );
                                             ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(content: const Text("Deleted"),)
                                             );
+
                                           //Delete request must be triggered..async delete func must be deleted!
 
                                         })

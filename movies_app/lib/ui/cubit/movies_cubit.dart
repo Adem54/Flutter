@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movies_app/data/entity/movie.dart';
 import 'package:movies_app/data/repo/movie_dao_repostory.dart';
@@ -11,24 +12,47 @@ import 'package:movies_app/ui/cubit/movies_state.dart';
 // bu state ler her degistiginde biz emit gonderiyoruz ya o emit state in degismesine
 // bakar state degismis ise o UI yi tetikler ve UI da da Blockbuilder tarafindan dinlenir ve yakalanir
 class MoviesCubit extends Cubit<MoviesState> {
-
+//class MoviesCubit extends Cubit<List<Movie>> {
   MoviesCubit():super(MoviesInitial());
+ // MoviesCubit():super(<Movie>[]);
   var movieRepo = MovieDaoRepostory();
 
+  var collectionMovies = FirebaseFirestore.instance.collection("Movies");
+  //BURDA OKURKEN REAL-TIME OLARAK OKUMAYACAGIZ..ONU PERSONLISTTE ZATEN YAPMISTIK
 
   Future<void> fetchMovies() async {
-    try
-    {
-      emit(MoviesLoading());
-      final movies = await movieRepo.fetchMovies();
-      emit(MoviesLoaded(movies));
-    }catch(e)
-    {
-      emit(MoviesError(e.toString()));
-    }
+    //snapshots yapisi gercek zamanli okuma alt yapisi
+    collectionMovies.get().then((value){
+       var movies = <Movie>[];
 
-  }
+       //documents ler tum kaytilarimiz al demektir
+       var documents = value.docs;
+
+
+       for(var document in documents)
+       {
+            var key = document.id;//burasi ise collectionid kismidir..bunu alalim ki movie_id ye atamamiz gerekecek
+            var data = document.data();//data dedgimz kisim name,id,image,price kismidi
+            var movie = Movie.fromJson(data, key);
+            movies.add(movie);
+       }
+
+      // emit(movies);
+
+       try
+       {
+         emit(MoviesLoading());
+         emit(MoviesLoaded(movies));
+       }catch(e)
+       {
+         emit(MoviesError(e.toString()));
+       }
+
+
+    });
 }
+}
+
 //Burda veritabanindan gelen verileri aliriz..ve eger ki ui da gosterilmeden once yapilacak islem
 // var ise de onu da burda yapariz ki ui temiz kalsin her zaman
 

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movies_app/data/entity/movie.dart';
@@ -59,6 +60,26 @@ Sonra kullanima baktim...
     context.read<MoviesCubit>().fetchMovies();
     //Dikkat edelim sayfamiz ilk calistiginda gidecek MoviesCubtiimizden bir referans olusturacak-
     // yani constructor i calisacak ve fetchMovies i tetikleyecek
+
+    //Firestore da movie uygulamamiz icin tablo ve data oluturmayi biz burda manuel yapalim!!!!
+
+   /*
+    FIRESTORE A MANUEL MOVIE EKLEME KODLARIMZ 1 KERE EKLEDIKTEN SONRA YORUMA ALALIMKI SUREKLI EKLEMESIN
+    var collectionMovies = FirebaseFirestore.instance.collection("Movies");
+
+    var f1 = {"id": "", "name": "Django", "image": "django.png", "price": 24};
+    var f2 = {"id": "", "name": "Interstellar", "image": "interstellar.png", "price": 32};
+    var f3 = {"id": "", "name": "Inception", "image": "inception.png", "price": 16};
+    var f4 = {"id": "", "name": "The Hateful Eight", "image": "thehatefuleight.png", "price": 28};
+    var f5 = {"id": "", "name": "The Pianist", "image": "thepianist.png", "price": 18};
+    var f6 = {"id": "", "name": "Anadoluda", "image": "anadoluda.png", "price": 10};
+    collectionMovies.add(f1);
+    collectionMovies.add(f2);
+    collectionMovies.add(f3);
+    collectionMovies.add(f4);
+    collectionMovies.add(f5);
+    collectionMovies.add(f6);
+*/
   }
 
   @override
@@ -121,9 +142,9 @@ Sonra kullanima baktim...
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
-                            /*child: Image.asset("images/${movie.image}",
-                              fit: BoxFit.cover,*/
-                            child:Image.network(movie.image, width: 80, height: 80, fit: BoxFit.cover),
+                            child: Image.asset("images/${movie.image}",
+                            fit: BoxFit.cover,)
+                            //child:Image.network(movie.image, width: 80, height: 80, fit: BoxFit.cover),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 5),

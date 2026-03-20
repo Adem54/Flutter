@@ -22,8 +22,8 @@ class _MovieDetailState extends State<MovieDetail> {
         child:Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-           // Image.asset("images/${widget.movie.image}", fit: BoxFit.cover,
-            Image.network(widget.movie.image, fit: BoxFit.cover),
+            Image.asset("images/${widget.movie.image}", fit: BoxFit.cover),
+          //  Image.network(widget.movie.image, fit: BoxFit.cover),
 
             Text("${widget.movie.price} ₺", style: TextStyle(fontSize: 28),)
           ],
